@@ -41,9 +41,30 @@ Open-Meteo Archive API
 
 ---
 
-![Project Overview](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/Project%20pipeline.jpg)
+![Project Overview](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/pipelineinfo.png)
 
 ---
+---
+
+## 🧩 Technologies & Tools Used
+
+| Category | Technology / Tool | Purpose |
+|----------|-------------------|---------|
+| Orchestration | Apache Airflow (Dockerized) | Workflow scheduling & dependency management |
+| Containerization | Docker | Local Airflow environment isolation |
+| Language | Python | API ingestion & orchestration logic |
+| HTTP Client | Requests Module | REST API communication |
+| AWS SDK | Boto3 | Programmatic AWS interaction |
+| Cloud Storage | Amazon S3 | Data lake storage layers |
+| Distributed Processing | AWS Glue (PySpark) | Spark-based ETL transformations |
+| Metadata Discovery | AWS Glue Crawler | Schema inference & partition detection |
+| Metadata Catalog | AWS Glue Data Catalog | Athena table definitions |
+| Query Engine | Amazon Athena | SQL querying on S3 |
+| BI Tool | Power BI | Analytics & visualization |
+| Credential Management | AWS CLI + IAM Roles | Secure AWS authentication |
+
+---
+
 
 ## 🔄 End-to-End Data Lifecycle (Step-Wise)
 
@@ -120,24 +141,8 @@ The pipeline follows a structured **Extract → Transform → Load → Analytics
 
 ---
 
-## 🧩 Technologies & Tools Used
 
-| Category | Technology / Tool | Purpose |
-|----------|-------------------|---------|
-| Orchestration | Apache Airflow (Dockerized) | Workflow scheduling & dependency management |
-| Containerization | Docker | Local Airflow environment isolation |
-| Language | Python | API ingestion & orchestration logic |
-| HTTP Client | Requests Module | REST API communication |
-| AWS SDK | Boto3 | Programmatic AWS interaction |
-| Cloud Storage | Amazon S3 | Data lake storage layers |
-| Distributed Processing | AWS Glue (PySpark) | Spark-based ETL transformations |
-| Metadata Discovery | AWS Glue Crawler | Schema inference & partition detection |
-| Metadata Catalog | AWS Glue Data Catalog | Athena table definitions |
-| Query Engine | Amazon Athena | SQL querying on S3 |
-| BI Tool | Power BI | Analytics & visualization |
-| Credential Management | AWS CLI + IAM Roles | Secure AWS authentication |
 
----
 
 ## 📡 Data Source Layer
 
