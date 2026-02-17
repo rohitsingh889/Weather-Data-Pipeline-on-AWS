@@ -4,7 +4,7 @@
 
 This project implements a production-style **batch data engineering pipeline** that ingests historical weather data from the **Open-Meteo Archive API**, stores raw data in Amazon S3, performs distributed transformations using **AWS Glue (PySpark)**, generates analytics-ready datasets, and enables SQL-based querying via **AWS Glue Data Catalog and Amazon Athena** — fully orchestrated by **Apache Airflow running in a Dockerized local environment**.
 
-**API Provider:** https://open-meteo.com/
+**Data Source API:** https://open-meteo.com/
 
 ---
 
@@ -25,7 +25,7 @@ The goal of this pipeline is to demonstrate **real-world cloud data engineering 
 
 ## 🏗 High-Level Architecture
 
-**Pipeline Flow**
+Pipeline Flow:
 
 Open-Meteo Archive API  
 → Python Extraction Layer  
@@ -41,7 +41,7 @@ Open-Meteo Archive API
 
 ---
 
-![Pipeline](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/Project%20pipeline.jpg)
+![Project Overview](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/Project%20pipeline.jpg)
 
 ---
 
@@ -53,22 +53,22 @@ The pipeline follows a structured **Extract → Transform → Load → Analytics
 
 ### 1️⃣ Extract Phase – API Ingestion
 
-✔ Weather data retrieved from the Open-Meteo Archive API  
+✔ Weather data retrieved from Open-Meteo Archive API  
 ✔ Python used as the ingestion engine  
 ✔ REST calls executed via the `requests` module  
-✔ Raw JSON responses preserved without modification  
+✔ Raw JSON responses preserved  
 
-**Output**
+**Output:**
 
-→ Raw JSON stored in the Bronze layer (Amazon S3)
+→ Raw JSON stored in Bronze layer (Amazon S3)
 
-**S3 Structure**
+**S3 Folders**
 
-![S3 Bucket](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/s3%20bucket.png)
+![Project Overview](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/s3%20bucket.png)
 
 **Bronze Layer**
 
-![Bronze](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/bronze.png)
+![Project Overview](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/bronze.png)
 
 ---
 
@@ -81,11 +81,13 @@ The pipeline follows a structured **Extract → Transform → Load → Analytics
 ✔ Duplicate records removed  
 ✔ Data quality checks enforced  
 
-**Output**
+**Output:**
 
-→ Cleaned Parquet datasets written to the Silver layer
+→ Cleaned Parquet datasets written to Silver layer
 
-![Silver](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/silver.png)
+**Silver Layer**
+
+![Project Overview](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/silver.png)
 
 ---
 
@@ -93,13 +95,15 @@ The pipeline follows a structured **Extract → Transform → Load → Analytics
 
 ✔ Silver datasets aggregated into daily metrics  
 ✔ Business-friendly schema produced  
-✔ Dataset optimized for analytics workloads  
+✔ Dataset optimized for analytics  
 
-**Output**
+**Output:**
 
-→ Analytics-ready Parquet datasets written to the Gold layer
+→ Analytics-ready Parquet datasets written to Gold layer
 
-![Gold](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/gold.png)
+**Gold Layer**
+
+![Project Overview](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/gold.png)
 
 ---
 
@@ -110,9 +114,9 @@ The pipeline follows a structured **Extract → Transform → Load → Analytics
 ✔ Athena executes SQL queries  
 ✔ Power BI consumes Gold datasets  
 
-**Purpose**
+**Purpose:**
 
-→ Business intelligence and reporting
+→ Business intelligence & reporting
 
 ---
 
@@ -141,14 +145,14 @@ The pipeline follows a structured **Extract → Transform → Load → Analytics
 
 The pipeline retrieves **historical hourly weather observations** for configured cities.
 
-**Data Retrieved**
+Data retrieved includes:
 
 - temperature_2m  
 - precipitation  
 - windspeed_10m  
 - timestamp  
 
-The API returns nested JSON structures that require flattening during transformation.
+The API returns nested JSON structures requiring flattening.
 
 ---
 
@@ -157,16 +161,22 @@ The API returns nested JSON structures that require flattening during transforma
 ### Responsibilities
 
 ✔ Call Open-Meteo API using `requests`  
-✔ Fetch previous day's data dynamically  
-✔ Preserve raw JSON responses  
-✔ Upload directly to the S3 Bronze layer using `boto3`
+✔ Fetch previous day’s data dynamically  
+✔ Preserve raw JSON response  
+✔ Upload directly to S3 Bronze layer using `boto3`
+
+All source Python scripts are stored in the **same configured DAG location inside the Dockerized Airflow environment**, ensuring consistent execution and simplified orchestration.
+
+---
 
 ### Libraries Used
 
-**Requests Module**  
+**Requests Module**
+
 Used for external REST API communication.
 
-**Boto3 (AWS SDK)**  
+**Boto3 (AWS SDK)**
+
 Used for:
 
 ✔ S3 PutObject operations  
@@ -185,7 +195,7 @@ Authentication handled via:
 ✔ IAM user / role permissions  
 ✔ Boto3 credential provider chain  
 
-Driver behavior:
+Driver logic:
 
 - Boto3 automatically resolves credentials  
 - Uses environment / IAM / config chain  
@@ -198,7 +208,7 @@ Driver behavior:
 **Storage:** Amazon S3  
 **Format:** Raw JSON  
 
-**Partitioning Strategy**
+**Partitioning Strategy:**
 
 ```
 bronze/weather/
@@ -215,7 +225,7 @@ bronze/weather/
 ✔ Debugging & auditing  
 ✔ Schema recovery  
 
-No transformations are applied.
+No transformations applied.
 
 ---
 
@@ -232,9 +242,13 @@ No transformations are applied.
 ✔ Remove duplicates  
 ✔ Apply data quality checks  
 
+---
+
 ### Output Format
 
 ✔ Parquet (columnar, optimized)
+
+**Partitioning:**
 
 ```
 silver/weather/date=YYYY-MM-DD/
@@ -258,7 +272,7 @@ Example checks:
 - Negative windspeed prevented  
 - Duplicate city/timestamp removed  
 
-Invalid data → Job fails intentionally.
+Bad data → Job fails intentionally.
 
 ---
 
@@ -278,9 +292,13 @@ Invalid records trigger controlled job failure to prevent downstream corruption.
 ✔ Enable root-cause analysis  
 ✔ Preserve pipeline continuity  
 
-![Glue Jobs](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/glue%20jobs%20list.png)
+**Glue Jobs on AWS**
 
-![Silver Job Success](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/silver%20job%20sucess.png)
+![Project Overview](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/glue%20jobs%20list.png)
+
+**Silver Job Success**
+
+![Project Overview](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/silver%20job%20sucess.png)
 
 ---
 
@@ -292,12 +310,14 @@ Invalid records trigger controlled job failure to prevent downstream corruption.
 
 Transform Silver hourly records → Daily metrics
 
-**Aggregations**
+Aggregations:
 
 - avg_temperature  
 - max_temperature  
 - total_precipitation  
 - avg_windspeed  
+
+---
 
 ### Output
 
@@ -308,7 +328,11 @@ Transform Silver hourly records → Daily metrics
 gold/weather/date=YYYY-MM-DD/
 ```
 
-![Gold Job Success](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/gold%20job%20sucess.png)
+**Gold Job Success**
+
+![Project Overview](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/gold%20job%20sucess.png)
+
+---
 
 ### Purpose
 
@@ -323,9 +347,11 @@ gold/weather/date=YYYY-MM-DD/
 The pipeline follows a **partition-level incremental model**.
 
 ✔ Process only `process_date`  
-✔ Overwrite only the target partition  
+✔ Overwrite only that partition  
 ✔ Idempotent reruns  
 ✔ Prevent duplicate records  
+
+**Mechanism:**
 
 ```python
 .mode("overwrite")
@@ -336,9 +362,9 @@ The pipeline follows a **partition-level incremental model**.
 
 ## ⛓ Orchestration Layer – Apache Airflow
 
-Airflow acts as the **central control plane** of the pipeline.
+Airflow acts as the **central control plane** of the pipeline, coordinating task execution and ensuring reliable workflow management.
 
-![Airflow DAG](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/airflow...dag.png)
+![Project Overview](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/airflow...dag.png)
 
 ### Airflow Responsibilities
 
@@ -348,9 +374,17 @@ Airflow acts as the **central control plane** of the pipeline.
 ✔ Trigger Glue Crawler  
 ✔ Retry & failure handling  
 
-![Airflow Gantt](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/Airflow%20gantt%20chart.png)
+**Gantt Chart**
 
-![Airflow Graph](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/Airflow%20graph.png)
+![Project Overview](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/Airflow%20gantt%20chart.png)
+
+**Airflow Graph**
+
+![Project Overview](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/Airflow%20graph.png)
+
+**Airflow DAG**
+
+![Project Overview](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/airflow.png)
 
 ---
 
@@ -360,9 +394,6 @@ Airflow acts as the **central control plane** of the pipeline.
 ✔ Containerized execution  
 ✔ Cloud orchestration simulation  
 
-All source Python scripts used in the pipeline (extraction logic, Glue triggers, helpers) are placed inside the **same configured DAG directory** mounted into the Dockerized Airflow environment.  
-This ensures Airflow can directly discover, import, and execute all pipeline components without additional configuration.
-
 ---
 
 ## 🧾 Metadata & Schema Management
@@ -370,9 +401,11 @@ This ensures Airflow can directly discover, import, and execute all pipeline com
 ✔ Glue Crawler infers schema  
 ✔ Glue Data Catalog stores tables  
 
-![Crawler](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/crawler.png)
+**Glue Crawler**
 
-![Crawler Success](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/crawler%20sucess.png)
+![Project Overview](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/crawler.png)
+
+![Project Overview](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/crawler%20sucess.png)
 
 ---
 
@@ -386,7 +419,11 @@ Amazon Athena enables **SQL querying directly on S3 Parquet datasets**.
 ✔ Pay-per-query pricing  
 ✔ Glue Catalog integration  
 
-![Athena](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/athena%20.png)
+**Athena Querying**
+
+![Project Overview](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/athena%20.png)
+
+![Project Overview](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/athena%20tables.png)
 
 ---
 
@@ -396,6 +433,24 @@ Amazon Athena enables **SQL querying directly on S3 Parquet datasets**.
 SELECT city, avg_temperature
 FROM gold_weather
 WHERE date = DATE '2026-02-16';
+```
+
+---
+
+### Common Analytics Queries
+
+```sql
+-- Hottest city
+SELECT city, max_temperature
+FROM gold_weather
+ORDER BY max_temperature DESC
+LIMIT 1;
+
+-- Daily trend
+SELECT date, avg_temperature
+FROM gold_weather
+WHERE city = 'Delhi'
+ORDER BY date;
 ```
 
 ---
@@ -411,7 +466,13 @@ Planned visuals:
 ✔ City comparisons  
 ✔ KPI metrics  
 
-**BI Dashboard Upload Pending — Will Be Added Soon**
+NOTE: BI dashboard upload pending — will be completed soon.
+
+---
+
+**VS Code Project Structure**
+
+![Project Overview](https://github.com/rohitsingh889/--weather-lake-pipeline/blob/main/PICS/vs%20code%20....png)
 
 ---
 
@@ -431,7 +492,7 @@ This project is part of my professional portfolio and demonstrates a **productio
 
 Key skills reflected:
 
-- Workflow orchestration with Apache Airflow (Dockerized)  
+- Workflow orchestration with Apache Airflow (local, Dockerized)  
 - REST API ingestion and immutable data lake design  
 - AWS Glue–based distributed ETL using PySpark  
 - Schema inference and partition management with Glue Crawlers  
@@ -441,3 +502,5 @@ Key skills reflected:
 
 📬 **LinkedIn:**  
 https://www.linkedin.com/in/rohit-raj-singh-3030172a4
+
+---
