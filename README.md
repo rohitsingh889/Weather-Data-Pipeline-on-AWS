@@ -206,6 +206,30 @@ Bad data → Job fails intentionally.
 
 ---
 
+---
+
+### 🚦 Data Quality Enforcement Strategy
+
+Silver layer transformations implement a **fail-fast validation model**:
+
+✔ Null checks  
+✔ Domain range checks  
+✔ Duplicate detection  
+
+Invalid records trigger controlled job failure to prevent downstream corruption.
+
+**Future Enhancement – Quarantine Pattern**
+
+In production-grade systems, invalid records are often redirected to a **quarantine / dead-letter zone** for inspection rather than failing the entire job.
+
+Planned extension:
+
+✔ Redirect invalid rows to `silver/quarantine/`  
+✔ Enable root-cause analysis  
+✔ Preserve pipeline continuity  
+
+Current implementation prioritizes correctness and data integrity.
+
 ## 📊 Gold Layer – Analytics Zone
 
 **Processing Engine:** AWS Glue (Aggregation Job)
@@ -396,6 +420,30 @@ Planned visuals:
 ---
 
 ---
+---
+
+## 💰 Cost Optimization Strategy
+
+The pipeline is designed with **query efficiency and cost control** in mind.
+
+Since Amazon Athena follows a **pay-per-data-scanned model**, dataset design directly impacts query cost.
+
+Optimizations implemented:
+
+✔ **Columnar Storage (Parquet)**  
+Parquet significantly reduces scan size compared to raw JSON.
+
+✔ **Partitioning by Date**  
+Silver and Gold layers are partitioned by `date`, ensuring Athena scans only relevant partitions.
+
+✔ **Reduced Dataset Size in Gold Layer**  
+Gold layer stores aggregated daily metrics, minimizing query overhead.
+
+Result:
+
+→ Faster queries  
+→ Lower Athena costs  
+→ Production-aligned data lake design
 
 ## ✅ Key Data Engineering Concepts Demonstrated
 
