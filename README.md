@@ -431,15 +431,7 @@ Amazon Athena enables **SQL querying directly on S3 Parquet datasets**.
 
 ---
 
-### Example Query
 
-```sql
-SELECT city, avg_temperature
-FROM gold_weather
-WHERE date = DATE '2026-02-16';
-```
-
----
 
 ### Common Analytics Queries
 
