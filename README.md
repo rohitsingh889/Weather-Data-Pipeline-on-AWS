@@ -444,15 +444,14 @@ WHERE date = DATE '2026-02-16';
 ### Common Analytics Queries
 
 ```sql
--- Hottest city
-SELECT city, max_temperature
-FROM gold_weather
-ORDER BY max_temperature DESC
-LIMIT 1;
+-- Get weather for a specific date
+SELECT city, avg_temperature, max_temperature
+FROM gold
+WHERE date = '2026-02-16';
 
 -- Daily trend
 SELECT date, avg_temperature
-FROM gold_weather
+FROM gold
 WHERE city = 'Delhi'
 ORDER BY date;
 ```
@@ -487,6 +486,145 @@ NOTE: BI dashboard upload pending — will be completed soon.
 ✔ Reduced Athena scan costs  
 
 ---
+## ▶️ How to Run This Project
+
+This pipeline is designed to run using **Dockerized Apache Airflow locally** while interacting with **AWS services in the cloud**.
+
+---
+
+### 1️⃣ Prerequisites
+
+Ensure the following tools are installed:
+
+✔ Docker  
+✔ Docker Compose  
+✔ AWS CLI  
+✔ Python (optional for local testing)
+
+Verify installations:
+
+```bash
+docker --version
+docker-compose --version
+aws --version
+```
+
+---
+
+### 2️⃣ Configure AWS Credentials
+
+Authenticate your local environment with AWS:
+
+```bash
+aws configure
+```
+
+Provide:
+
+✔ AWS Access Key  
+✔ AWS Secret Key  
+✔ Default Region (e.g., us-east-1)  
+✔ Output Format (json)
+
+Credentials are automatically used by **boto3** and Airflow tasks.
+
+---
+
+### 3️⃣ Start Airflow Environment
+
+From the project root directory:
+
+```bash
+docker-compose up airflow-init
+docker-compose up
+```
+
+Airflow services will start inside containers.
+
+Access Airflow UI:
+
+```
+http://localhost:8080
+```
+
+Default login:
+
+✔ Username: airflow  
+✔ Password: airflow  
+
+---
+
+### 4️⃣ DAG & Script Placement
+
+All pipeline Python scripts (extraction logic, Glue triggers, helpers) must reside inside the **configured DAG folder** mounted into Docker.
+
+Example:
+
+```
+project-root/
+    dags/
+        weather_pipeline_dag.py
+        extraction.py
+        glue_helpers.py
+```
+
+This allows Airflow to automatically discover and execute tasks.
+
+---
+
+### 5️⃣ Enable & Trigger Pipeline
+
+Inside Airflow UI:
+
+✔ Locate the DAG  
+✔ Toggle DAG to "ON"  
+✔ Click **Trigger DAG**
+
+Airflow will execute tasks sequentially:
+
+Extraction → Glue Silver Job → Glue Gold Job → Crawler
+
+---
+
+### 6️⃣ Monitor Execution
+
+Airflow provides built-in observability:
+
+✔ Graph View → Task dependencies  
+✔ Gantt View → Execution timing  
+✔ Logs → Debugging & failures  
+
+---
+
+### 7️⃣ Query Results
+
+After successful execution:
+
+✔ Open Amazon Athena  
+✔ Query `gold` table  
+
+Example:
+
+```sql
+SELECT city, avg_temperature
+FROM gold
+ORDER BY avg_temperature DESC;
+```
+
+---
+
+### 8️⃣ Failure Recovery
+
+The pipeline supports safe reruns:
+
+✔ Incremental partition overwrite  
+✔ Idempotent job design  
+✔ No duplicate record risk  
+
+Simply re-trigger the DAG if needed.
+
+---
+
 
 ## 👨‍💻 Author & Project Context
 
